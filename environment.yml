@@ -1,0 +1,10 @@
+name: llm-finetuning
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - datasets
+  - transformers
+  - evaluate
+  - ipykernel
+prefix: /opt/homebrew/Caskroom/miniforge/base/envs/llm-finetuning
