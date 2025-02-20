@@ -36,7 +36,9 @@ def load_and_preprocess(dataset_name, model_checkpoint='gpt2', text_column='text
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
     # Assign the end-of-sequence token as the padding token
-    tokenizer.pad_token = tokenizer.eos_token
+    # add pad token if none exists
+    if tokenizer.pad_token is None:
+        tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
     # Tokenize the dataset
     def tokenize_function(examples):
@@ -49,4 +51,4 @@ def load_and_preprocess(dataset_name, model_checkpoint='gpt2', text_column='text
 
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-    return tokenized_datasets
+    return tokenizer, tokenized_datasets
