@@ -121,7 +121,8 @@ from evaluate import evaluator
 task_evaluator = evaluator("text-classification")
 
 # model_name = 'gpt2' # '../checkpoints/2025-02-19_19-20-34/checkpoint-704/' 
-model_name = '../checkpoints/2025-02-20_00-49-32-text-classification-ag_news/checkpoint-4220'
+# model_name = '../checkpoints/2025-02-20_00-49-32-text-classification-ag_news/checkpoint-4220'
+model_name = 'EleutherAI/gpt-neo-125M'
 dataset_name = 'fancyzhx/ag_news' # 'imdb'
 max_length = 1024
 
@@ -132,10 +133,14 @@ tokenizer, tokenized_data = load_and_preprocess(dataset_name=dataset_name,
 
 id2label = {0: "World", 1: "Sports", 2: "Business", 3: "Sci/Tech"}
 label2id = {"World": 0, "Sports": 1, "Business": 2, "Sci/Tech": 3}
-model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=4, id2label=id2label, label2id=label2id)
+model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+                                                           num_labels=4, 
+                                                           id2label=id2label, 
+                                                           label2id=label2id)
 model.resize_token_embeddings(len(tokenizer))
 model.config.pad_token_id = model.config.eos_token_id
 
+print(model)
 
 results = task_evaluator.compute(
     model_or_pipeline=model,

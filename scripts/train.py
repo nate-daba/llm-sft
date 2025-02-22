@@ -15,8 +15,10 @@ from load_data import load_and_preprocess
 from transformers import DataCollatorWithPadding, TrainingArguments, Trainer
 import evaluate 
 
-model_name = 'gpt2'
-dataset_name = 'fancyzhx/ag_news' # 'imdb'
+# model_name = 'gpt2'
+model_name = 'EleutherAI/gpt-neo-125M'
+dataset_name = 'fancyzhx/ag_news' # 
+dataset_name = 'imdb'
 max_length = 1024
 task = 'text-classification'
 
@@ -50,8 +52,8 @@ def compute_metrics(eval_pred):
 training_args = TrainingArguments(
     output_dir=ckpt_dir,
     learning_rate=2e-5,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    per_device_train_batch_size=24,
+    per_device_eval_batch_size=24,
     num_train_epochs=15,
     weight_decay=0.01,
     eval_strategy="epoch",
@@ -65,7 +67,7 @@ trainer = Trainer(
     model,
     training_args,
     train_dataset=tokenized_datasets["train"],
-    eval_dataset=tokenized_datasets["validation"],
+    eval_dataset=tokenized_datasets["test"],
     data_collator=data_collator,
     tokenizer=tokenizer,
     compute_metrics=compute_metrics
