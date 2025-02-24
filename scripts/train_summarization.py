@@ -2,7 +2,7 @@ import os
 project_name = 'llm-fine-tuning'
 os.environ["WANDB_PROJECT"] = project_name
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3,4"
 
 from datetime import datetime
 import torch
@@ -21,8 +21,8 @@ from random import randrange
 import evaluate 
 from huggingface_hub import HfFolder
 
-# model_name = 'google/flan-t5-base'
-model_name = '../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/'
+model_name = 'google/flan-t5-base'
+# model_name = '../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/'
 dataset_name = "knkarthick/samsum"
 max_length = 1024
 task = 'text-summarization'
@@ -94,10 +94,9 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate=True,
     fp16=False, # Overflows with fp16
     learning_rate=5e-5,
-    num_train_epochs=15,
+    num_train_epochs=40,
     # logging & evaluation strategies
-    logging_strategy="steps",
-    logging_steps=500,
+    logging_strategy="epoch",
     evaluation_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,

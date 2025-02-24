@@ -25,8 +25,9 @@ import evaluate
 # model_name = '../checkpoints/2025-02-23_00-19-57-text-classification-imdb/checkpoint-5280/'
 # model_name = '../checkpoints/2025-02-23_00-49-20-text-classification-ag_news/checkpoint-20256/'
 # model_name = '../checkpoints/2025-02-23_00-56-11-text-classification-imdb/checkpoint-2814/'
-model_name = '../checkpoints/2025-02-23_01-02-47-text-classification-ag_news/checkpoint-33750/'
-dataset_name = 'imdb'
+# model_name = '../checkpoints/2025-02-23_01-02-47-text-classification-ag_news/checkpoint-33750/'
+model_name = 'EleutherAI/gpt-neo-125M'
+dataset_name = 'fancyzhx/ag_news'
 max_length = 1024
 task = 'text-classification'
 
@@ -49,7 +50,6 @@ label2id = {"World": 0, "Sports": 1, "Business": 2, "Sci/Tech": 3} # uncomment t
 model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=4, id2label=id2label, label2id=label2id)
 model.resize_token_embeddings(len(tokenizer))
 model.config.pad_token_id = model.config.eos_token_id
-model.train()
 
 print(model)
 
@@ -94,12 +94,92 @@ print(model)
 
 # test_results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
 # print(test_results)
-dataset = load_dataset('imdb')
-classifier = pipeline("sentiment-analysis", model="stevhliu/my_awesome_model")
+
+
+# =======================================================
+# SENTIMENT CLASSIFICATION (GPT-2 on IMDB dataset)
+# =======================================================
+
+# dataset = load_dataset('imdb')
+
+# baseline_classifier = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer) 
+# finetuned_model_name = '../checkpoints/2025-02-23_00-19-57-text-classification-imdb/checkpoint-5280/'
+# finetuned_classifier = pipeline("sentiment-analysis", model=finetuned_model_name, tokenizer=tokenizer)
+
+# # select a random test sample
+# sample = dataset['test'][6]
+# print(f"Review: \n{sample['text']}\n---------------")
+
+# baseline_prediction = baseline_classifier(sample['text'])
+# finetuned_prediction = finetuned_classifier(sample['text'])
+
+# print('Baseline prediction:', baseline_prediction)
+# print('Fine-tuned prediction:', finetuned_prediction)
+# print('Ground truth:', id2label[sample['label']])
+# =======================================================
+
+# =======================================================
+# SENTIMENT CLASSIFICATION (GPT-Neo on IMDB dataset)
+# =======================================================
+
+# dataset = load_dataset('imdb')
+
+# baseline_classifier = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer) 
+# finetuned_model_name = '../checkpoints/2025-02-23_00-56-11-text-classification-imdb/checkpoint-2814/'
+# finetuned_classifier = pipeline("sentiment-analysis", model=finetuned_model_name, tokenizer=tokenizer)
+
+# # select a random test sample
+# sample = dataset['test'][6]
+# print(f"Review: \n{sample['text']}\n---------------")
+
+# baseline_prediction = baseline_classifier(sample['text'])
+# finetuned_prediction = finetuned_classifier(sample['text'])
+
+# print('Baseline prediction:', baseline_prediction)
+# print('Fine-tuned prediction:', finetuned_prediction)
+# print('Ground truth:', id2label[sample['label']])
+
+# =======================================================
+
+# =======================================================
+# TOPIC CLASSIFICATION (GPT-2 on AG_News)
+# =======================================================
+# dataset = load_dataset("fancyzhx/ag_news")
+
+# baseline_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer)
+# finetuned_model_name = '../checkpoints/2025-02-23_00-49-20-text-classification-ag_news/checkpoint-20256/'
+# finetuned_classifier = pipeline("text-classification", model=finetuned_model_name, tokenizer=tokenizer)
+
+# # select a random test sample
+# sample = dataset['test'][6]
+# print(f"News: \n{sample['text']}\n---------------")
+
+# baseline_prediction = baseline_classifier(sample['text'])
+# finetuned_prediction = finetuned_classifier(sample['text'])
+
+# print('Baseline prediction:', baseline_prediction)
+# print('Fine-tuned prediction:', finetuned_prediction)
+# print('Ground truth:', id2label[sample['label']])
+
+# =======================================================
+# TOPIC CLASSIFICATION (GPT-Neo on AG_News)
+# =======================================================
+dataset = load_dataset("fancyzhx/ag_news")
+
+baseline_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer)
+finetuned_model_name = '../checkpoints/2025-02-23_01-02-47-text-classification-ag_news/checkpoint-33750/'
+finetuned_classifier = pipeline("text-classification", model=finetuned_model_name, tokenizer=tokenizer)
 
 # select a random test sample
-sample = dataset['test'][randrange(len(dataset["test"]))]
-print(f"dialogue: \n{sample['text']}\n---------------")
+sample = dataset['test'][6]
+print(f"News: \n{sample['text']}\n---------------")
+
+baseline_prediction = baseline_classifier(sample['text'])
+finetuned_prediction = finetuned_classifier(sample['text'])
+
+print('Baseline prediction:', baseline_prediction)
+print('Fine-tuned prediction:', finetuned_prediction)
+print('Ground truth:', id2label[sample['label']])
 
 wandb.finish()
 
