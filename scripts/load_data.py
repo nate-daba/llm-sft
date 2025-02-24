@@ -16,7 +16,7 @@ def load_and_preprocess(dataset_name, model_checkpoint='gpt2', text_column='text
         DatasetDict: A dictionary with tokenized 'train', 'validation', and 'test' splits.
     """
     # Load the dataset
-    dataset = load_dataset(dataset_name)
+    dataset = load_dataset(dataset_name, cache_dir='/workspace/ndaba/research/data/llm_data')
     
     # Remove examples with None or empty strings in the text column
     dataset = dataset.filter(lambda x: x[text_column] is not None and x[text_column].strip() != '')

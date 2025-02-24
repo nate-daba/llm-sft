@@ -10,6 +10,10 @@ __pycache__/
 checkpoints/
 scripts/wandb
 
+# macOS system files
+.DS_Store
+._.DS_Store
+
 # Distribution / packaging
 .Python
 build/

@@ -2,7 +2,7 @@ import os
 project_name = 'llm-fine-tuning'
 os.environ["WANDB_PROJECT"] = project_name
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3,4"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 from datetime import datetime
 import torch
@@ -14,19 +14,25 @@ from nltk.tokenize import sent_tokenize
 # nltk.download("punkt_tab")
 
 from load_data import load_and_preprocess
-from transformers import AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainer, Seq2SeqTrainingArguments
+from transformers import AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainer, Seq2SeqTrainingArguments, pipeline
+from datasets import load_dataset
+from random import randrange        
+
 import evaluate 
 from huggingface_hub import HfFolder
 
-model_name = 'google/flan-t5-base'
+# model_name = 'google/flan-t5-base'
+model_name = '../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/'
 dataset_name = "knkarthick/samsum"
 max_length = 1024
 task = 'text-summarization'
 
+base_model_name = "google/flan-t5-base"  # or your original model path
+
 # Load and preprocess the dataset
 tokenizer, tokenized_dataset = load_and_preprocess(
     dataset_name=dataset_name,
-    model_checkpoint=model_name,
+    model_checkpoint=base_model_name,
     text_column='dialogue',  # Input column in the original dataset
     max_length=max_length,
     task='text-summarization'
@@ -88,7 +94,7 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate=True,
     fp16=False, # Overflows with fp16
     learning_rate=5e-5,
-    num_train_epochs=10,
+    num_train_epochs=15,
     # logging & evaluation strategies
     logging_strategy="steps",
     logging_steps=500,
@@ -104,13 +110,35 @@ trainer = Seq2SeqTrainer(
     args=training_args,
     data_collator=data_collator,
     train_dataset=tokenized_dataset["train"],
-    eval_dataset=tokenized_dataset["test"],
+    eval_dataset=tokenized_dataset["validation"],
     compute_metrics=compute_metrics,
 )
 
 print(tokenized_dataset)
 print(model)
 
-trainer.train()
+# trainer.train()
 
-trainer.evaluate()
+# test_results = trainer.evaluate(eval_dataset=tokenized_dataset["test"])
+# print(test_results)
+
+dataset_id = "samsum"
+dataset = load_dataset(dataset_id)
+
+# load model and tokenizer from huggingface hub with pipeline
+summarizer = pipeline("summarization", 
+                    #   model="../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/", 
+                        model="google/flan-t5-base",
+                        tokenizer=base_model_name, 
+                        device=0)
+
+# select a random test sample
+sample = dataset['test'][randrange(len(dataset["test"]))]
+print(f"dialogue: \n{sample['dialogue']}\n---------------")
+
+# summarize dialogue
+res = summarizer(sample["dialogue"])
+
+print(f"flan-t5-base summary:\n{res[0]['summary_text']}")
+
+wandb.finish()
