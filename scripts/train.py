@@ -4,7 +4,7 @@ import os
 project_name = 'llm-fine-tuning'
 os.environ["WANDB_PROJECT"] = project_name
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="0,7"
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
 
 import torch
 import wandb
@@ -26,7 +26,7 @@ import evaluate
 # model_name = '../checkpoints/2025-02-23_00-49-20-text-classification-ag_news/checkpoint-20256/'
 # model_name = '../checkpoints/2025-02-23_00-56-11-text-classification-imdb/checkpoint-2814/'
 # model_name = '../checkpoints/2025-02-23_01-02-47-text-classification-ag_news/checkpoint-33750/'
-model_name = 'EleutherAI/gpt-neo-125M'
+model_name = '../checkpoints/2025-02-24_05-07-33-text-classification-ag_news/checkpoint-2250/'
 dataset_name = 'fancyzhx/ag_news'
 max_length = 1024
 task = 'text-classification'
@@ -68,7 +68,7 @@ training_args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=24,
     per_device_eval_batch_size=24,
-    num_train_epochs=15,
+    num_train_epochs=50,
     weight_decay=0.01,
     eval_strategy="epoch",
     save_strategy="epoch",
@@ -92,8 +92,8 @@ print(model)
 
 # trainer.train()
 
-# test_results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
-# print(test_results)
+test_results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
+print(test_results)
 
 
 # =======================================================
@@ -164,22 +164,22 @@ print(model)
 # =======================================================
 # TOPIC CLASSIFICATION (GPT-Neo on AG_News)
 # =======================================================
-dataset = load_dataset("fancyzhx/ag_news")
+# dataset = load_dataset("fancyzhx/ag_news")
 
-baseline_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer)
-finetuned_model_name = '../checkpoints/2025-02-23_01-02-47-text-classification-ag_news/checkpoint-33750/'
-finetuned_classifier = pipeline("text-classification", model=finetuned_model_name, tokenizer=tokenizer)
+# baseline_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer)
+# finetuned_model_name = '../checkpoints/2025-02-23_01-02-47-text-classification-ag_news/checkpoint-33750/'
+# finetuned_classifier = pipeline("text-classification", model=finetuned_model_name, tokenizer=tokenizer)
 
-# select a random test sample
-sample = dataset['test'][6]
-print(f"News: \n{sample['text']}\n---------------")
+# # select a random test sample
+# sample = dataset['test'][6]
+# print(f"News: \n{sample['text']}\n---------------")
 
-baseline_prediction = baseline_classifier(sample['text'])
-finetuned_prediction = finetuned_classifier(sample['text'])
+# baseline_prediction = baseline_classifier(sample['text'])
+# finetuned_prediction = finetuned_classifier(sample['text'])
 
-print('Baseline prediction:', baseline_prediction)
-print('Fine-tuned prediction:', finetuned_prediction)
-print('Ground truth:', id2label[sample['label']])
+# print('Baseline prediction:', baseline_prediction)
+# print('Fine-tuned prediction:', finetuned_prediction)
+# print('Ground truth:', id2label[sample['label']])
 
 wandb.finish()
 

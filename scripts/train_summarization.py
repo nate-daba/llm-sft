@@ -23,6 +23,7 @@ from huggingface_hub import HfFolder
 
 model_name = 'google/flan-t5-base'
 # model_name = '../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/'
+# model_name = '../checkpoints/2025-02-24_04-51-05-text-summarization-samsum/checkpoint-4988/'
 dataset_name = "knkarthick/samsum"
 max_length = 1024
 task = 'text-summarization'
@@ -93,8 +94,8 @@ training_args = Seq2SeqTrainingArguments(
     per_device_eval_batch_size=32,
     predict_with_generate=True,
     fp16=False, # Overflows with fp16
-    learning_rate=5e-5,
-    num_train_epochs=40,
+    learning_rate=2e-4,
+    num_train_epochs=50,
     # logging & evaluation strategies
     logging_strategy="epoch",
     evaluation_strategy="epoch",
@@ -116,28 +117,32 @@ trainer = Seq2SeqTrainer(
 print(tokenized_dataset)
 print(model)
 
-# trainer.train()
+trainer.train()
 
-# test_results = trainer.evaluate(eval_dataset=tokenized_dataset["test"])
-# print(test_results)
+test_results = trainer.evaluate(eval_dataset=tokenized_dataset["test"])
+print(test_results)
 
-dataset_id = "samsum"
-dataset = load_dataset(dataset_id)
+# dataset_id = "samsum"
+# dataset = load_dataset(dataset_id)
 
-# load model and tokenizer from huggingface hub with pipeline
-summarizer = pipeline("summarization", 
-                    #   model="../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/", 
-                        model="google/flan-t5-base",
-                        tokenizer=base_model_name, 
-                        device=0)
+# # load model and tokenizer from huggingface hub with pipeline
+# summarizer = pipeline("summarization", 
+#                     #   model="../checkpoints/2025-02-23_11-24-19-text-summarization-samsum/checkpoint-1392/", 
+#                         # model="google/flan-t5-base",
+#                         model="../checkpoints/2025-02-24_04-51-05-text-summarization-samsum/checkpoint-4988/",
+#                         tokenizer=base_model_name, 
+#                         device=0)
 
-# select a random test sample
-sample = dataset['test'][randrange(len(dataset["test"]))]
-print(f"dialogue: \n{sample['dialogue']}\n---------------")
+# # select a random test sample
+# sample = dataset['test'][randrange(len(dataset["test"]))]
+# print(f"dialogue: \n{sample['dialogue']}\n---------------")
 
-# summarize dialogue
-res = summarizer(sample["dialogue"])
-
-print(f"flan-t5-base summary:\n{res[0]['summary_text']}")
+# # summarize dialogue
+# res = summarizer(sample["dialogue"])
+# print("="*80)
+# # Ground truth 
+# print("Ground truth:", sample["summary"])
+# print(f"flan-t5-base summary:\n{res[0]['summary_text']}")
+# print("="*80)
 
 wandb.finish()
